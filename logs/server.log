@@ -121,3 +121,5 @@
 [34m[01:15:19] [TRACE/[1mWebSocket[22m][39m: Connection [94m192.168.0.1[39m send message: [94m{"username":"SCP-173","content":"<span style=\"color: aqua\">тест</span>"}[39m
 [34m[01:15:23] [TRACE/[1mWebSocket[22m][39m: Connection [94m192.168.0.1[39m send message: [94m{"username":"SCP-173","content":"color: aqua"}[39m
 [34m[01:16:24] [TRACE/[1mWebSocket[22m][39m: Connection [94m85.140.2.251[39m send message: [94m{"username":" ","content":""}[39m
+[34m[01:17:03] [TRACE/[1mWebSocket[22m][39m: Connection [94m85.140.2.251[39m send message: [94m{"username":" ","content":"https://media.tenor.com/images/7d60383b817590c12d24180f7d99cffe/tenor.gif"}[39m
+[34m[01:17:32] [TRACE/[1mWebSocket[22m][39m: Connection [94m85.140.2.251[39m send message: [94m{"username":" ","content":"Ща символ достанк"}[39m
