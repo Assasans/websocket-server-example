@@ -133,6 +133,10 @@ const server: http.Server = http.createServer((request: http.IncomingMessage, re
 						sendMessage();
 					}
 				});
+
+				$('#button-chat-clear').on('click', (event) => {
+					$('#chat').empty();
+				});
 			});
 			</script>
 
@@ -140,7 +144,8 @@ const server: http.Server = http.createServer((request: http.IncomingMessage, re
 
 			<input id="input-username" placeholder="Имя пользователя" /><br />
 			<input id="input-content" placeholder="Сообщение" /><br />
-			<button id="button-send">Отправить</button><br />
+			<button id="button-send">Отправить</button>
+			<button id="button-chat-clear">Очистить чат</button><br />
 			<br />
 
 			<div id="chat"></div>
