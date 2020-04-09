@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>WebSocket Chat</title>
+		<title>Дурка</title>
 	</head>
 	<body>
 		<style>
@@ -21,14 +21,43 @@
 			border: 2px #1565c0 solid;
 		}
 
+		div {
+			border: 2px #f57c00 solid;
+		}
+
 		a {
 			font-family: 'Roboto', sans-serif;
 
 			/* border: 2px #212121 solid; */
 		}
 
-		#message-options {
+		button {
+			width: 100%;
+		}
+
+		input {
+			width: 100%;
+			box-sizing: border-box;
+		}
+
+		ul {
+			margin: 0;
+		}
+
+		#options {
+			width: 16em;
+		}
+
+		#options-server {
 			padding: 0.2em;
+			margin-bottom: 0.5em;
+			
+			border: 2px #6a1b9a solid;
+		}
+
+		#options-message {
+			padding: 0.2em;
+			margin-bottom: 0.5em;
 			
 			border: 2px #6a1b9a solid;
 		}
@@ -60,6 +89,12 @@
 			border: 2px #e91e63 solid;
 		}
 
+		.user-info {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+		}
+
 		.text-title {
 			display: block;
 
@@ -88,6 +123,10 @@
 			color: #212121;
 		}
 
+		.message-local {
+			color: #2e7d32;
+		}
+
 		.message-system {
 			color: #d32f2f;
 		}
@@ -102,161 +141,30 @@
 			color: #6a1b9a;
 		}
 		</style>
+
 		<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/luxon@1.23.0/build/global/luxon.min.js"></script>
 
-		<script>
+		<script src="main.js"></script>
 
-		const connectedUsers = [];
-
-		function addUser(id, user) {
-			const users = $('#users');
-
-			const element = $('<div class="user"></div>');
-			const username = $('<a class="user-username"></a>');
-
-			username.text(user);
-
-			element.append(username);
-
-			users.append(element);
-
-			connectedUsers[id] = element;
-		}
-
-		function removeUser(id, user) {
-			const element = connectedUsers[id];
-
-			element.remove();
-
-			delete connectedUsers[id];
-		}
-
-		function _log(html) {
-			const chat = $('#chat');
-
-			const element = $('<span class="message"></span>');
-
-			element.html(html);
-
-			chat.append(element);
-			chat.append($('<br />'));
-
-			chat.animate({scrollTop: $('#chat').prop("scrollHeight")}, 0);
-		}
-
-		const log = {
-			system: function system(time, text) {
-				_log(`<a class="message-time">[${time}] </a><a class="message-type message-system">[Gateway]: </a><a class="message-content">${text}</a>`);
-			},
-			error: function error(time, text) {
-				_log(`<a class="message-time">[${time}] </a><a class="message-type message-error">[Error]: </a><a class="message-error">${text}</a>`);
-			},
-
-			incoming: function incoming(time, text) {
-				_log(`<a class="message-time">[${time}] </a><a class="message-type message-incoming">[Incoming]: </a><a class="message-incoming">${text}</a>`);
-			},
-			outcoming: function outcoming(time, text) {
-				_log(`<a class="message-time">[${time}] </a><a class="message-type message-outcoming">[Outcoming]: </a><a class="message-outcoming">${text}</a>`);
-			}
-		};
-
-		function sendMessage(gateway) {
-			if($('#input-content')[0].value.length < 1) return;
-
-			const username = $('#input-username')[0].value;
-			const content = $('#input-content')[0].value.replace(/script/g, 'sсript');
-
-			$('#input-content')[0].value = '';
-			
-			if(gateway) {
-				websocket.send(JSON.stringify({
-					system: true,
-					content: content
-				}));
-				_log(`<a class="message-time">[${luxon.DateTime.local().toFormat('HH:mm:ss')}] </a><a class="message-type message-outcoming">[Outcoming]: </a><a class="message-type message-system">[Gateway]: </a><a class="message-outcoming">${content}</a>`);
-			} else {
-				websocket.send(JSON.stringify({
-					username: username,
-					content: content
-				}));
-				log.outcoming(luxon.DateTime.local().toFormat('HH:mm:ss'), `[${username || '<span style="color: #d84315;">Unknown</span>'}]: ${content}`);
-			}
-		}
-
-		function connect(serverURL) {
-			websocket = new WebSocket(serverURL);
-
-			websocket.onopen = (event) => {
-				log.system(luxon.DateTime.local().toFormat('HH:mm:ss'), 'Соединение с WebSocket сервером установлено');
-			};
-			websocket.onclose = (event) => {
-				log.system(luxon.DateTime.local().toFormat('HH:mm:ss'), 'Соединение с WebSocket сервером разорвано');
-			};
-			websocket.onmessage = (event) => {
-				try {
-					console.log(event.data);
-					const message = JSON.parse(event.data);
-					if(message.type === 'gateway') {
-						if(message.action === 'user_connect') {
-							log.system(message.time, `${message.content}`);
-							addUser(message.user.id, message.ip);
-						}
-						if(message.action === 'user_disconnect') {
-							log.system(message.time, `${message.content}`);
-							removeUser(message.user.id);
-						}
-
-						if(message.action === 'custom') {
-							log.system(message.time, `${message.content}`);
-						}
-					} else if(message.type === 'user') {
-						log.incoming(message.time, `[${message.username || '<span style="color: #d84315;">Unknown</span>'}]: ${message.content}`);
-					}
-				} catch(error) {
-					log.error(null, error);
-				}
-			};
-			websocket.onerror = (event) => {
-				log.error(event.data);
-			};
-		}
-
-		$(document).ready(() => {
-			connect('ws://assasans.ml:2012/websocket');
-			
-			$('#button-send').on('click', (event) => {
-				sendMessage(false);
-			});
-			$(document).on('keypress', (event) => {
-				if(event.which === 13) {
-					sendMessage(false);
-				}
-			});
-
-			$('#button-send-gateway').on('click', (event) => {
-				sendMessage(true);
-			});
-
-			$('#button-chat-clear').on('click', (event) => {
-				$('#chat').empty();
-			});
-		});
-		</script>
-
-		<span>
+		<div id="options">
 			<a class="text-title">Дурка</a><br />
-			<div id="message-options">
-				<input id="input-username" placeholder="Имя пользователя" /><br />
-				<input id="input-content" placeholder="Сообщение" /><br />
+			<div id="options-server">
+				<input type="text" id="input-server" name="server" placeholder="Адрес сервера" /><br />
+				<button id="button-server-connect">Попасть в дурку</button><br />
+				<button id="button-server-disconnect">Сбежать из дурки</button>
+			</div>
+			<div id="options-message">
+				<input type="text" id="input-username" name="username" placeholder="Имя пользователя" /><br />
+				<input type="text" id="input-content" name="message" autocomplete="off" placeholder="Сообщение" /><br />
 				<span>
 					<button id="button-send">Отправить</button><br />
-					<button id="button-send-gateway">Отправить от имени шлюза</button>
+					<button id="button-send-gateway">Отправить от имени шлюза</button><br />
 				</span>
 				<button id="button-chat-clear">Очистить чат</button>
 			</div>
 			<div id="users"></div>
-		</span>
+		</div>
 
 		<div id="chat"></div>
 	</body>
