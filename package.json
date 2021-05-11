@@ -23,7 +23,7 @@
   "dependencies": {
     "@discordjs/collection": "^0.1.5",
     "chalk": "^4.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "log4js": "^6.1.2",
     "luxon": "^1.23.0",
     "promise-fs": "^2.1.1",
